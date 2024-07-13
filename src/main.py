@@ -1,7 +1,11 @@
 import os
 import uvicorn
+import src.database
+import src.models
+
 
 from fastapi import FastAPI
+
 
 from src.users.router import user
 
