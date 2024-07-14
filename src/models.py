@@ -8,16 +8,21 @@ from src.database import engine, Base
 
 class UserClass(Base):
     __tablename__ = "user_classes"
+    id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("user.id"), primary_key=True)
     class_id = Column(Integer, ForeignKey("class.id"), primary_key=True)
+    created_at = Column(DateTime, server_default=func.now())
+
     user = relationship("User", foreign_keys=[user_id], overlaps="classes")
     class_ = relationship("Class", foreign_keys=[class_id], overlaps="users")
 
 
 class UserCourse(Base):
     __tablename__ = "user_courses"
+    id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("user.id"), primary_key=True)
     course_id = Column(Integer, ForeignKey("course.id"), primary_key=True)
+    created_at = Column(DateTime, server_default=func.now())
     user = relationship("User", foreign_keys=[user_id], overlaps="courses")
     course = relationship("Course", foreign_keys=[course_id], overlaps="users")
 
@@ -25,7 +30,7 @@ class UserCourse(Base):
 class User(Base):
     __tablename__ = "user"
     id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True)
+    email = Column(String(255), unique=True, index=True)
     created_at = Column(DateTime, server_default=func.now())
     courses = relationship(
         "Course", secondary="user_courses", back_populates="users")

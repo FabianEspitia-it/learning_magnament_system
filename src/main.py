@@ -8,6 +8,7 @@ from fastapi import FastAPI
 
 
 from src.users.router import user
+from src.courses.router import course
 
 
 app = FastAPI()
@@ -15,6 +16,7 @@ app = FastAPI()
 app.title = "learning System API"
 
 app.include_router(user)
+app.include_router(course)
 
 if __name__ == "__main__":
 
