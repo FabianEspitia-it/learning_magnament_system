@@ -2,6 +2,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session, joinedload
 
 from src.models import *
+from src.courses.schemas import NewClass
 
 
 def all_courses(db: Session):
@@ -30,4 +31,22 @@ def get_module_class(db: Session, course_id: int, module_id: int, class_id: int)
     if len(searched_class) == 0:
         raise HTTPException(status_code=404, detail="Class not found") 
     return searched_class[0]
+
+
+def add_class_to_module(db: Session, course_id: int, module_id: int, new_class: NewClass):
+    class_module = get_module_by_id(db, course_id, module_id)
+    class_instance = Class(
+        title= new_class.title,
+        video_link=new_class.video_link,
+        description=new_class.description,
+        previous_id=new_class.previous_id,
+        next_id=new_class.next_id,
+        module_id=new_class.module_id,
+        module=class_module
+    )
+    
+    db.add(class_instance)
+    db.commit()
+
+    return class_instance
 

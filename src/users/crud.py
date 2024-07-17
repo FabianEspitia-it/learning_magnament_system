@@ -11,7 +11,7 @@ def get_user_by_id(db: Session, user_id: int) -> User:
 
 
 def add_new_user(db: Session, user_email: str) -> User:
-    if not check_email(user_email) or get_user_by_email(user_email) is not None:
+    if not check_email(user_email) or get_user_by_email(user_email, db) is not None:
         raise HTTPException(status_code= 400, detail='User already exists')
     user: User = User(email=user_email)
     db.add(user)
