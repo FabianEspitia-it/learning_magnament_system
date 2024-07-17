@@ -37,3 +37,7 @@ def update_class_seen_user(user_email: str, class_id: int, db: Session = Depends
 def update_class_unseen_user(user_email: str, class_id: int, db: Session = Depends(get_db)):
     mark_class_unseen_user(user_email, class_id, db)
     return JSONResponse(content={"response": "deleted"}, status_code=200)
+
+@user.get("/users/course/{course_id}/modules")
+def get_users_seen_classes_in_module(user_email: str, course_id: int, db: Session = Depends(get_db)):
+    return seen_classes_by_user(user_email, course_id, db)

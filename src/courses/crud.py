@@ -17,7 +17,7 @@ def get_modules_by_course_id(db: Session, course_id: int):
 
 
 def get_module_by_id(db: Session, course_id: int, module_id: int) -> Class:
-    module = db.query(Module).filter(Module.course_id == course_id).options(joinedload(Module.classes)).first()
+    module = db.query(Module).filter(Module.course_id == course_id and Module.id == module_id).options(joinedload(Module.classes)).first()
     if module is None:
         raise HTTPException(status_code=404, detail="Module not found")
     return module

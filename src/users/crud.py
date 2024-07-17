@@ -2,7 +2,7 @@ from fastapi import HTTPException
 
 from sqlalchemy.orm import Session, joinedload
 
-from src.models import User, UserClass
+from src.models import User, UserClass, Class, Course
 from src.utils.validations import check_email
 
 def get_user_by_id(db: Session, user_id: int) -> User:
@@ -45,3 +45,17 @@ def mark_class_unseen_user(user_email: str, class_id: int, db: Session):
     db.delete(user_class)
     db.commit()
     return user_class
+
+
+def seen_classes_by_user(user_email: str, course_id: int, db: Session):
+    user: User = db.query(User).filter(User.email == user_email).first()
+    if not user:
+        return []
+    
+    classes = db.query(Class).join(UserClass
+    ).filter(
+        UserClass.user_id == user.id,
+    ).filter(
+        UserClass.class_id == Class.id,
+    ).all()
+    return classes
