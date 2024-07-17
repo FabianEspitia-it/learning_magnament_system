@@ -63,7 +63,7 @@ def seen_classes_by_user(user_email: str, course_id: int, db: Session):
     return classes
 
 
-def calculate_process(user_email: str, course_id: int, db: Session):
+def calculate_progress(user_email: str, course_id: int, db: Session):
     seen_classes: list[Class] = seen_classes_by_user(user_email, course_id, db)
     modules: list[Module] = get_modules_by_course_id(db, course_id)
     total_classes: list[Class] = []
@@ -71,6 +71,5 @@ def calculate_process(user_email: str, course_id: int, db: Session):
     for module in modules:
         total_classes = total_classes + module.classes
     
-    percentage_process: float = float(len(seen_classes)) / float(len(total_classes))
-    return percentage_process
-
+    percentage_progress: int = int(len(seen_classes)) / int(len(total_classes))
+    return f"{int(percentage_progress * 100)}%"
