@@ -41,3 +41,10 @@ def update_class_unseen_user(user_email: str, class_id: int, db: Session = Depen
 @user.get("/users/course/{course_id}/modules")
 def get_users_seen_classes_in_module(user_email: str, course_id: int, db: Session = Depends(get_db)):
     return seen_classes_by_user(user_email, course_id, db)
+
+@user.get("/users/course/{course_id}/process")
+def get_course_process(user_email: str, course_id: int, db: Session = Depends(get_db)):
+    return JSONResponse(
+        content={"progress": calculate_process(user_email, course_id, db)},
+        status_code=200
+        )
