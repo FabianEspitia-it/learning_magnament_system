@@ -1,9 +1,11 @@
 from fastapi import HTTPException
 
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 
-from src.models import User, UserClass, Class, Course
+from src.models import User, UserClass, Class, Course, Module
 from src.utils.validations import check_email
+
+from src.courses.crud import get_modules_by_course_id
 
 def get_user_by_id(db: Session, user_id: int) -> User:
     user: User = db.query(User).filter(User.id == user_id).first()
@@ -59,3 +61,16 @@ def seen_classes_by_user(user_email: str, course_id: int, db: Session):
         UserClass.class_id == Class.id,
     ).all()
     return classes
+
+
+def calculate_process(user_email: str, course_id: int, db: Session):
+    seen_classes: list[Class] = seen_classes_by_user(user_email, course_id, db)
+    modules: list[Module] = get_modules_by_course_id(db, course_id)
+    total_classes: list[Class] = []
+
+    for module in modules:
+        total_classes = total_classes + module.classes
+    
+    percentage_process: float = float(len(seen_classes)) / float(len(total_classes))
+    return percentage_process
+
