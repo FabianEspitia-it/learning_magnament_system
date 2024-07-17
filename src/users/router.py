@@ -32,3 +32,8 @@ def delete_user(user_id: int, user: User = Depends(), db: Session = Depends(get_
 def update_class_seen_user(user_email: str, class_id: int, db: Session = Depends(get_db)):
     mark_class_seen_user(user_email, class_id, db)
     return JSONResponse(content={"response": "created"}, status_code=201)
+
+@user.delete("/users/classes/{class_id}")
+def update_class_unseen_user(user_email: str, class_id: int, db: Session = Depends(get_db)):
+    mark_class_unseen_user(user_email, class_id, db)
+    return JSONResponse(content={"response": "deleted"}, status_code=200)

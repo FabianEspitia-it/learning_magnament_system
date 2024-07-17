@@ -30,9 +30,18 @@ def delete_user(db: Session, user_id: int) -> User:
 def get_user_by_email(user_email: str, db: Session) -> User:
     return db.query(User).filter(User.email == user_email).first()
 
+
 def mark_class_seen_user(user_email: str, class_id: int, db: Session):
     user: User = db.query(User).filter(User.email == user_email).first()
     user_class = UserClass(user_id=user.id, class_id=class_id)
     db.add(user_class)
+    db.commit()
+    return user_class
+
+
+def mark_class_unseen_user(user_email: str, class_id: int, db: Session):
+    user: User = db.query(User).filter(User.email == user_email).first()
+    user_class: UserClass = db.query(UserClass).filter(UserClass.class_id == class_id and UserClass.user_id == user.id).first()
+    db.delete(user_class)
     db.commit()
     return user_class
