@@ -8,8 +8,8 @@ from src.users.crud import *
 user = APIRouter()
 
 @user.get('/users/{user_id}')
-def get_user(user_id: int, db: Session = Depends(get_db)):
-    user = get_user_by_id(user_id)
+async def get_user(user_id: int, db: Session = Depends(get_db)):
+    user = get_user_by_id(db, user_id)
     if user is None:
         raise HTTPException(status_code=404, detail='User not found')
     return user
@@ -27,3 +27,8 @@ def update_user(user_id: int, user: User = Depends(), db: Session = Depends(get_
 def delete_user(user_id: int, user: User = Depends(), db: Session = Depends(get_db)):
     pass
 
+
+@user.post("/users/classes/{class_id}")
+def update_class_seen_user(user_email: str, class_id: int, db: Session = Depends(get_db)):
+    mark_class_seen_user(user_email, class_id, db)
+    return JSONResponse(content={"response": "created"}, status_code=201)
