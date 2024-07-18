@@ -47,6 +47,7 @@ class Course(Base):
     users = relationship("User", secondary="user_courses",
                          back_populates="courses")
     modules = relationship("Module", back_populates="course")
+    events = relationship("Event", back_populates="course")
 
 
 class Module(Base):
@@ -74,6 +75,17 @@ class Class(Base):
     module = relationship("Module", back_populates="classes")
     users = relationship("User", secondary="user_classes",
                          back_populates="classes")
+
+
+class Event(Base):
+    __tablename__ = "event"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False)
+    event_date = Column(DateTime, nullable=False)
+    description = Column(String(255), nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+    course_id = Column(Integer, ForeignKey("course.id"))
+    course = relationship("Course", back_populates="events")
 
 
 Base.metadata.create_all(bind=engine)
