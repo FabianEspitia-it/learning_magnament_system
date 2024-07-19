@@ -73,3 +73,17 @@ def calculate_progress(user_email: str, course_id: int, db: Session):
     
     percentage_progress: int = int(len(seen_classes)) / int(len(total_classes))
     return f"{int(percentage_progress * 100)}%"
+
+
+def get_all_users_with_course_progress(db: Session):
+    users: list[User] = db.query(User).all()
+    courses: list[Course] = db.query(Course).all()
+    result = []
+    for user in users:
+        for course in courses:
+            result.append({
+                "user": user.email,
+                "course": course.title,
+                "progress": calculate_progress(user.email, course.id, db)
+            })
+    return result

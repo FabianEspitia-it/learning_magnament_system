@@ -1,5 +1,9 @@
+import pandas as pd
+import io
+
 from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.responses import JSONResponse
+from starlette.responses import StreamingResponse
 
 from src.database import get_db
 
@@ -52,3 +56,15 @@ def get_course_progress(user_email: str, course_id: int, db: Session = Depends(g
         status_code=200
         )
 
+
+@user.get("/users/information/", tags=["users"])
+def get_user_information(db: Session = Depends(get_db)):
+    users_information = get_all_users_with_course_progress(db= db)
+    df = pd.DataFrame([user for user in users_information])
+
+    # Using BytesIO to save the CSV in memory
+    buffer = io.BytesIO()
+    df.to_csv(buffer, index=False)
+    buffer.seek(0)
+
+    return StreamingResponse(buffer, media_type="text/csv", headers={"Content-Disposition": "attachment;filename=users_data.csv"})
