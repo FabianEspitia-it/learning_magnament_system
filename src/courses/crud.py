@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session, joinedload
 
 from src.models import *
-from src.courses.schemas import NewClass
+from src.courses.schemas import NewClass, NewEvent
 
 
 def all_courses(db: Session):
@@ -50,3 +50,51 @@ def add_class_to_module(db: Session, course_id: int, module_id: int, new_class: 
 
     return class_instance
 
+
+def get_event_by_id(db: Session, event_id: str):
+    return db.query(Event).filter(Event.id == event_id).first()
+
+
+def get_all__course_events(db: Session, course_id: str):
+    return db.query(Course).filter(Course.id == course_id).options(joinedload(Course.events)).all()
+
+
+def add_new_event_to_course(db: Session, course_id: str, new_event: NewEvent):
+    course = get_course_by_id(db, course_id)
+    
+    if course is None:
+        raise HTTPException('Course not found', status_code=404)
+    
+    event = Event(
+        title = new_event.title,
+        event_date = new_event.date,
+        description = new_event.description,
+        course_id = course_id,
+        course = course
+    )
+
+    db.add(event)
+    db.commit()
+
+    return event
+
+def update_event(db: Session, event_id: str, new_event_data: NewEvent):
+    event = get_event_by_id(db, event_id)
+    if event is None:
+        raise HTTPException('Event not found', status_code=404)
+
+    for var, value in vars(new_event_data).items():
+        setattr(event, var, value) if value else None
+
+    db.add(event)
+    db.commit()
+    db.refresh(event)
+
+    return event
+
+
+def delete_event_by_id(db: Session, event_id: str):
+    event = get_event_by_id(db, event_id)
+    db.delete(event)
+    db.commit()
+    return event
