@@ -1,19 +1,22 @@
+import json
 import pandas as pd
 import io
 
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, BackgroundTasks, HTTPException, status, Depends
 from fastapi.responses import JSONResponse
 from starlette.responses import StreamingResponse
 
 from src.database import get_db
 
 from src.users.crud import *
+from src.users.send_email import send_email_async, send_email_background
+
 
 user = APIRouter()
 
-@user.get('/users/{user_id}', tags=["users"])
-def get_user(user_id: int, db: Session = Depends(get_db)):
-    user = get_user_by_id(db, user_id)
+@user.get('/users/{user_email}', tags=["users"])
+def get_user(user_email: str, db: Session = Depends(get_db)):
+    user = get_user_by_email(db = db, user_email = user_email)
     if user is None:
         raise HTTPException(status_code=404, detail='User not found')
     return user
@@ -21,7 +24,17 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
 
 @user.post('/users', tags=["users"])
 def add_user(user_email: str, db: Session = Depends(get_db)):
-    return add_new_user(db, user_email)
+
+    if not check_email(user_email):
+        raise HTTPException(status_code=400, detail='Invalid email')
+
+    add_new_user(db, user_email)
+    return JSONResponse(content={"response": "created"}, status_code=201)
+
+
+@user.get('/users', tags=["users"])
+def get_users(db: Session = Depends(get_db)):
+    return get_all_users(db)
 
 @user.put('/users/{user_id}', tags=["users"])
 def update_user(user_id: int, user: User = Depends(), db: Session = Depends(get_db)):
@@ -68,3 +81,26 @@ def get_user_information(db: Session = Depends(get_db)):
     buffer.seek(0)
 
     return StreamingResponse(buffer, media_type="text/csv", headers={"Content-Disposition": "attachment;filename=users_data.csv"})
+
+
+@user.post("/users/login", tags=["users"])
+def login_user(user_email: str, db: Session = Depends(get_db)):
+    user = get_user_by_email(user_email, db)
+    if user is None:
+        raise HTTPException(status_code=404, detail='User not found')
+    return user
+
+
+@user.get('/send-email/asynchronous')
+async def send_email_asynchronous():
+    body_dict = {'title': 'Hello World', 'name': 'John Doe'}
+    body_str = json.dumps(body_dict, ensure_ascii=False)  # Convierte a JSON con soporte para caracteres no ASCII
+    await send_email_async('Hello World', 'fabian@makers.ngo', body_str)
+    return 'Success'
+
+@user.get('/send-email/backgroundtasks')
+def send_email_backgroundtasks(background_tasks: BackgroundTasks):
+    body_dict = {'title': 'Hello World', 'name': 'John Doe'}
+    body_str = json.dumps(body_dict, ensure_ascii=False)  # Convierte a JSON con soporte para caracteres no ASCII
+    send_email_background(background_tasks, 'Hello World', 'fabian@makers.ngo', body_str)
+    return 'Success'

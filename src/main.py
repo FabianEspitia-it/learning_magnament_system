@@ -9,6 +9,7 @@ from fastapi import FastAPI
 
 from src.users.router import user
 from src.courses.router import course
+from src.events.router import event
 
 
 app = FastAPI()
@@ -17,6 +18,7 @@ app.title = "learning System API"
 
 app.include_router(user)
 app.include_router(course)
+app.include_router(event)
 
 if __name__ == "__main__":
 
